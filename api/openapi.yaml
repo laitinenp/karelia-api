@@ -1,0 +1,203 @@
+openapi: 3.0.0
+info:
+  title: (v0.1) Karelia API
+  description: "(v0.1) Provided to you by the Kyvykkyys project. Petri Laitinen, Karelia\
+    \ UAS"
+  version: 1.0.0
+servers:
+- url: http://localhost:3000/
+  description: (v0.1) "Open University Sample API Application"
+tags:
+- name: Access Control
+  description: (v0.1) Access control functions
+- name: Courses
+  description: (v0.1) Course descriptions
+- name: Services
+  description: (v0.1) Service description objects
+paths:
+  /api/courses:
+    get:
+      tags:
+      - Courses
+      summary: Returns a list of available courses
+      operationId: apiCoursesGET
+      responses:
+        "200":
+          description: (v1.0) Succesfully returned a list of available courses
+          content:
+            application/json:
+              schema:
+                type: array
+                description: list of service descriptors
+                items:
+                  $ref: '#/components/schemas/Course'
+                x-content-type: application/json
+            text/csv:
+              schema:
+                type: string
+              example: "id,name,description,learningObjectives DD10004,API Design\
+                \ & Development,API Design & Development using REST, Student is able\
+                \ to comprehend the ..."
+        "415":
+          description: Unsupported Media Type
+      x-swagger-router-controller: Courses
+  /api/courses/{courseId}:
+    get:
+      tags:
+      - Courses
+      summary: Returns a course
+      operationId: apiCoursesCourseIdGET
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: (v1.0) Succesfully returned a course object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        "404":
+          description: Not found
+        "415":
+          description: Unsupported Media Type
+        default:
+          description: Unexpected error
+      x-swagger-router-controller: Courses
+  /api/services/{service_id}:
+    get:
+      tags:
+      - Services
+      summary: Returns a service descriptor object
+      operationId: apiServicesService_idGET
+      parameters:
+      - name: service_id
+        in: path
+        description: (v1.0) Service Identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: (v1.0) Succesfully returned a service descriptor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+      security:
+      - bearerAuth: []
+      x-swagger-router-controller: Services
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: (v1.0) identifier
+          nullable: false
+        forename:
+          maxLength: 100
+          type: string
+          description: (v1.0) forename
+          nullable: false
+        surname:
+          maxLength: 100
+          type: string
+          description: (v1.0) family name
+          nullable: false
+        username:
+          maxLength: 100
+          type: string
+          description: (v1.0) forename
+          nullable: false
+        password:
+          maxLength: 100
+          type: string
+          description: (v1.0) forename
+          nullable: false
+        email:
+          maxLength: 1024
+          type: string
+          description: (v1.0) email address
+          nullable: false
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Course'
+      example:
+        userId: 123
+        forename: Gina
+        surname: Lollobrigida
+        username: gina
+        password: sosecret
+        email: gina@somemail.com
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          description: (v1.0) identifier
+          format: uuid
+          nullable: false
+        name:
+          maxLength: 100
+          type: string
+          description: (v1.0) course name
+          nullable: true
+        description:
+          maxLength: 1024
+          type: string
+          description: (v1.0) course description
+          nullable: true
+        learningObjectives:
+          maxLength: 1024
+          type: string
+          description: (v1.0) learning objectives for the course
+          nullable: true
+      example:
+        id: DD10004
+        name: API Design & Development
+        description: "API Design & Development using REST, GraphQL and Open API"
+        learningObjectives: |
+          Student knows the most common API technologies in use today Student is able to comprehend the opportunities and challenges in exploiting API's in businesses Student is able to design, document and implement REST APIs Student is able to design, document and implement GraphQL APIs Student is is able to apply OpenAPI Specification in describing and designing APIs
+    Service:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        name:
+          maxLength: 100
+          type: string
+          description: (v1.0) Course implementation description
+          nullable: true
+          example: API Design & Development
+        startDate:
+          type: string
+          description: course starting day
+          format: date
+          example: 2021-02-28
+        endDate:
+          type: string
+          description: course end date. can be null.
+          format: date
+          nullable: true
+          example: 2021-06-30
+        course:
+          $ref: '#/components/schemas/Course'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
